@@ -77,6 +77,13 @@ status: analyzed
    - [关键步骤]
    - [创新点]
 
+### 数学公式（Markdown LaTeX）
+- 行内公式请使用 `$...$`
+- 块级公式请使用 `$$...$$` 并单独成行
+- 行内示例：目标函数为 $L(\\theta)$。
+- 块级示例：
+    $$\\theta^* = \\arg\\min_\\theta L(\\theta)$$
+
 ### 方法架构
 [架构描述和图片引用]
 
@@ -236,6 +243,13 @@ status: analyzed
    - [Detailed description]
    - [Key steps]
    - [Innovation points]
+
+### Mathematical Formula (Markdown LaTeX)
+- Use `$...$` for inline formulas
+- Use `$$...$$` on a separate line for block formulas
+- Inline example: The objective is $L(\\theta)$.
+- Block example:
+    $$\\theta^* = \\arg\\min_\\theta L(\\theta)$$
 
 ### Method Architecture
 [Architecture description and image references]
