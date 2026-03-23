@@ -246,6 +246,7 @@ tags: ["llm-generated", "daily-paper-recommend"]
 
 所有论文按评分从高到低排列，使用统一格式
 
+**当 `language: "zh"` 时使用中文格式**：
 ```markdown
 ### [[论文名字]]
 - **作者**：[作者列表]
@@ -262,6 +263,27 @@ tags: ["llm-generated", "daily-paper-recommend"]
 - [贡献点3]
 
 **关键结果**：[从摘要中提取的最重要结果]
+
+---
+```
+
+**当 `language: "en"` 时使用英文格式**：
+```markdown
+### [[paper_note_filename|Paper Title]]
+- **Authors**: [author list]
+- **Affiliation**: [affiliation or "Not specified"]
+- **Links**: [arXiv](link) | [PDF](link)
+- **Source**: arXiv
+- **Notes**: [[existing_note_path]] or <<None>>
+
+**One-line Summary**: [one-line summary of core contribution]
+
+**Core Contributions**:
+- [Contribution 1]
+- [Contribution 2]
+- [Contribution 3]
+
+**Key Results**: [most important results from abstract]
 
 ---
 ```
@@ -301,7 +323,7 @@ tags: ["llm-generated", "daily-paper-recommend"]
 
 **步骤2：在推荐笔记中插入图片和链接**
 
-**如果已有笔记**：
+**当 `language: "zh"` 时（如果已有笔记）**：
 ```markdown
 ### [[已有论文名称]]
 - **作者**：[作者列表]
@@ -319,7 +341,7 @@ tags: ["llm-generated", "daily-paper-recommend"]
 ...
 ```
 
-**如果没有笔记**：
+**当 `language: "zh"` 时（如果没有笔记）**：
 ```markdown
 ### [[论文名字]]
 - **作者**：[作者列表]
@@ -336,6 +358,41 @@ tags: ["llm-generated", "daily-paper-recommend"]
 ...
 ```
 
+**当 `language: "en"` 时（如果已有笔记）**：
+```markdown
+### [[paper_note_filename|Paper Title]]
+- **Authors**: [author list]
+- **Affiliation**: [affiliation or "Not specified"]
+- **Links**: [arXiv](link) | [PDF](link)
+- **Source**: arXiv
+- **Detailed Report**: [[existing_note_path]]
+- **Notes**: Existing detailed analysis
+
+**One-line Summary**: [one-line summary]
+
+![existing image|600](existing_image_path)
+
+**Core Contributions**:
+...
+```
+
+**当 `language: "en"` 时（如果没有笔记）**：
+```markdown
+### [[paper_note_filename|Paper Title]]
+- **Authors**: [author list]
+- **Affiliation**: [affiliation or "Not specified"]
+- **Links**: [arXiv](link) | [PDF](link)
+- **Source**: arXiv
+- **Detailed Report**: [[detailed_report_path]] (auto-generated)
+
+**One-line Summary**: [one-line summary]
+
+![new extracted image|600](new_image_path)
+
+**Core Contributions**:
+...
+```
+
 **图片说明**：
 - 图片路径：`20_Research/Papers/[论文分类]/images/[论文ID]_fig1.png`
 - 宽度设置为 600px
@@ -347,6 +404,11 @@ tags: ["llm-generated", "daily-paper-recommend"]
   - 正确：`[[20_Research/Papers/大模型/Hypothesis-Conditioned_Query_Rewriting_for_Decision-Useful_Retrieval]]`
   - 错误：`[[20_Research/Papers/大模型/Hypothesis-Conditioned Query Rewriting for Decision-Useful Retrieval]]`
 - 在"详细报告"字段显示 wikilink：`- **详细报告**：[[20_Research/Papers/[domain]/[note_filename]]]`
+- **论文分类（domain）命名规则**：domain 名称必须与 `paper-analyze` 实际创建的目录名完全一致，**不得截断**。例如：
+  - 正确：`[[20_Research/Papers/Computational Pathology/ReconMIL_...]]`（保留完整域名）
+  - 错误：`[[20_Research/Papers/Computational]]`（截断了 "Pathology" 部分）
+  - 正确：`[[20_Research/Papers/Foundation Models & LLM/...]]`
+  - 错误：`[[20_Research/Papers/Foundation]]`（截断了 "Models & LLM" 部分）
 - 详细报告由 `paper-analyze` 自动生成，包含完整的论文分析
 
 ## 步骤5：自动链接关键词（可选）
