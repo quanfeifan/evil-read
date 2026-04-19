@@ -89,6 +89,13 @@ Then use this language setting throughout the workflow:
 
 ### 2.2 执行搜索和筛选
 
+首先运行偏好学习脚本（如果有用户反馈数据）：
+
+```bash
+cd "$SKILL_DIR"
+python scripts/learn_preferences.py --vault "$OBSIDIAN_VAULT_PATH"
+```
+
 使用 `scripts/search_arxiv.py` 脚本完成搜索、解析和筛选：
 
 ```bash
@@ -100,7 +107,8 @@ python scripts/search_arxiv.py \
   --output arxiv_filtered.json \
   --max-results 200 \
   --top-n 10 \
-  --categories "cs.AI,cs.LG,cs.CL,cs.CV,cs.MM,cs.MA,cs.RO"
+  --categories "cs.AI,cs.LG,cs.CL,cs.CV,cs.MM,cs.MA,cs.RO" \
+  --preferences "$OBSIDIAN_VAULT_PATH/99_System/Config/user_preferences.json"
 ```
 
 **脚本功能**：
@@ -296,6 +304,18 @@ Today's {paper_count} recommended papers focus on **{direction1}**, **{direction
 
 **Key Results**: [most important results from abstract]
 
+**Related Work Comparison**:
+| Method | Core Idea | Relation to This Paper |
+|--------|-----------|------------------------|
+| [method1] | [one line] | [improves/extends/compares] |
+| [method2] | [one line] | [improves/extends/compares] |
+
+**Technical Roadmap**: [research direction] — [position and contribution, 1-2 sentences]
+
+**Benchmarks**: [list notable benchmarks used, e.g. [[MMLU]] / [[HumanEval]] / [[GSM8K]], with this paper's results]
+
+**Technical Insights**: [1-2 sentences: key takeaway or ideas to borrow]
+
 ---
 ```
 
@@ -316,6 +336,18 @@ Today's {paper_count} recommended papers focus on **{direction1}**, **{direction
 - [贡献点3]
 
 **关键结果**：[从摘要中提取的最重要结果]
+
+**相关工作对比**：
+| 对比方法 | 核心思路 | 与本文关系 |
+|----------|----------|------------|
+| [方法1] | [一句话] | [改进/扩展/对比] |
+| [方法2] | [一句话] | [改进/扩展/对比] |
+
+**技术路线**：[所属方向] — [本文在该路线中的位置和贡献，1-2句话]
+
+**Benchmark**：[列出使用的知名 benchmark，如 [[MMLU]] / [[HumanEval]] / [[GSM8K]] 等，附本文结果]
+
+**技术感悟**：[1-2句话：这篇工作的启发点或可借鉴之处]
 
 ---
 ```
@@ -515,17 +547,18 @@ python scripts/link_keywords.py \
 
 3. **搜索和筛选 arXiv 论文**
    ```bash
-   # 使用 Python 脚本搜索、解析和筛选 arXiv 论文
-   # 首先切换到 skill 目录，然后执行脚本
-   # 如果有目标日期参数（如 2026-02-21），传递给 --target-date
+   # 先运行偏好学习
    cd "$SKILL_DIR"
+   python scripts/learn_preferences.py --vault "$OBSIDIAN_VAULT_PATH"
+   # 搜索和筛选（带偏好）
    python scripts/search_arxiv.py \
      --config "$OBSIDIAN_VAULT_PATH/99_System/Config/research_interests.yaml" \
      --output arxiv_filtered.json \
      --max-results 200 \
      --top-n 10 \
      --categories "cs.AI,cs.LG,cs.CL,cs.CV,cs.MM,cs.MA,cs.RO" \
-     --target-date "{目标日期}"  # 如果用户指定了日期，替换为实际日期
+     --target-date "{目标日期}" \
+     --preferences "$OBSIDIAN_VAULT_PATH/99_System/Config/user_preferences.json"
    ```
 
 4. **读取筛选结果**

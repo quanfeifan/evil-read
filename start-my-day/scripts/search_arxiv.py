@@ -97,6 +97,11 @@ WEIGHTS_HOT = {
     'quality': 0.10,
 }
 
+# 用户偏好评分常量
+PREFERENCE_MIN_FEEDBACK = 5      # 最少反馈数才启用偏好
+PREFERENCE_MAX_WEIGHT = 0.15     # 偏好维度最大权重
+PREFERENCE_RAMP_FEEDBACK = 30    # 达到此数时权重拉满
+
 # Semantic Scholar 速率限制等待时间（秒）
 S2_RATE_LIMIT_WAIT = 30
 S2_CATEGORY_REQUEST_INTERVAL = 3
@@ -692,13 +697,17 @@ def calculate_recommendation_score(
     recency_score: float,
     popularity_score: float,
     quality_score: float,
-    is_hot_paper: bool = False
+    is_hot_paper: bool = False,
+    preference_score: Optional[float] = None,
+    preference_weight: float = 0.0
 ) -> float:
     """
     计算综合推荐评分
 
     权重定义在模块顶部常量 WEIGHTS_NORMAL / WEIGHTS_HOT 中。
     对于高影响力论文（来自 Semantic Scholar），使用 WEIGHTS_HOT 提高热门度权重。
+    当 preference_score 不为 None 且 preference_weight > 0 时，
+    其余维度权重等比缩小，加入偏好维度。
 
     Args:
         relevance_score: 相关性评分 (0-SCORE_MAX)
@@ -706,6 +715,8 @@ def calculate_recommendation_score(
         popularity_score: 热门度评分 (0-SCORE_MAX)
         quality_score: 质量评分 (0-SCORE_MAX)
         is_hot_paper: 是否是高影响力论文
+        preference_score: 用户偏好评分 (0-SCORE_MAX)，None 表示不使用
+        preference_weight: 偏好维度权重 (0-PREFERENCE_MAX_WEIGHT)
 
     Returns:
         综合推荐评分 (0-10)
@@ -719,7 +730,15 @@ def calculate_recommendation_score(
     # 归一化到 0-10 分
     normalized = {k: (v / SCORE_MAX) * 10 for k, v in scores.items()}
 
-    weights = WEIGHTS_HOT if is_hot_paper else WEIGHTS_NORMAL
+    weights = dict(WEIGHTS_HOT if is_hot_paper else WEIGHTS_NORMAL)
+
+    # 如果有偏好分，等比缩小其余权重，加入偏好维度
+    if preference_score is not None and preference_weight > 0:
+        scale = 1.0 - preference_weight
+        weights = {k: v * scale for k, v in weights.items()}
+        weights['preference'] = preference_weight
+        normalized['preference'] = (preference_score / SCORE_MAX) * 10
+
     final_score = sum(normalized[k] * weights[k] for k in weights)
 
     return round(final_score, 2)
@@ -729,7 +748,8 @@ def filter_and_score_papers(
     papers: List[Dict],
     config: Dict,
     target_date: Optional[datetime] = None,
-    is_hot_paper_batch: bool = False
+    is_hot_paper_batch: bool = False,
+    preferences: Optional[Dict] = None
 ) -> List[Dict]:
     """
     筛选和评分论文
@@ -739,12 +759,44 @@ def filter_and_score_papers(
         config: 研究配置
         target_date: 目标日期（用于计算新近性）
         is_hot_paper_batch: 是否是高影响力论文批次
+        preferences: 用户偏好档案（可选）
 
     Returns:
         筛选和评分后的论文列表
     """
     domains = config.get('research_domains', {})
     excluded_keywords = config.get('excluded_keywords', [])
+
+    # 计算偏好权重
+    pref_weight = 0.0
+    if preferences:
+        total_fb = preferences.get('total_feedback_count', 0)
+        if total_fb < PREFERENCE_MIN_FEEDBACK:
+            pref_weight = 0.0
+        else:
+            ramp = min(
+                (total_fb - PREFERENCE_MIN_FEEDBACK)
+                / max(PREFERENCE_RAMP_FEEDBACK - PREFERENCE_MIN_FEEDBACK, 1),
+                1.0,
+            )
+            pref_weight = PREFERENCE_MAX_WEIGHT * ramp
+
+    # 延迟导入偏好评分函数
+    _calc_pref = None
+    if preferences and pref_weight > 0:
+        try:
+            from learn_preferences import calculate_preference_score
+            _calc_pref = calculate_preference_score
+        except ImportError:
+            # 尝试从同目录导入
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            sys.path.insert(0, script_dir)
+            try:
+                from learn_preferences import calculate_preference_score
+                _calc_pref = calculate_preference_score
+            except ImportError:
+                logger.warning("learn_preferences module not found, skipping preference scoring")
+                pref_weight = 0.0
 
     scored_papers = []
 
@@ -806,9 +858,15 @@ def filter_and_score_papers(
         summary = paper.get('summary', '') if 'summary' in paper else paper.get('abstract', '')
         quality = calculate_quality_score(summary)
 
+        # 计算用户偏好分
+        pref_score = None
+        if _calc_pref and pref_weight > 0:
+            pref_score = _calc_pref(paper, preferences)
+
         # 计算综合推荐评分
         recommendation_score = calculate_recommendation_score(
-            relevance, recency, popularity, quality, is_hot_paper_batch
+            relevance, recency, popularity, quality, is_hot_paper_batch,
+            preference_score=pref_score, preference_weight=pref_weight
         )
 
         # 添加评分信息
@@ -819,6 +877,8 @@ def filter_and_score_papers(
             'quality': round(quality, 2),
             'recommendation': recommendation_score
         }
+        if pref_score is not None:
+            paper['scores']['preference'] = round(pref_score, 2)
         paper['matched_domain'] = matched_domain
         paper['matched_keywords'] = matched_keywords
         paper['is_hot_paper'] = is_hot_paper_batch
@@ -856,6 +916,8 @@ def main():
                         help='Comma-separated list of arXiv categories')
     parser.add_argument('--skip-hot-papers', action='store_true',
                         help='Skip searching hot papers from Semantic Scholar')
+    parser.add_argument('--preferences', type=str, default=None,
+                        help='Path to user preferences JSON file (generated by learn_preferences.py)')
 
     args = parser.parse_args()
 
@@ -872,6 +934,30 @@ def main():
 
     logger.info("Loading config from: %s", args.config)
     config = load_research_config(args.config)
+
+    # 加载用户偏好
+    user_preferences = None
+    pref_path = args.preferences
+    if not pref_path:
+        vault_path = os.environ.get('OBSIDIAN_VAULT_PATH', '')
+        if vault_path:
+            auto_path = os.path.join(vault_path, '99_System', 'Config', 'user_preferences.json')
+            if os.path.isfile(auto_path):
+                pref_path = auto_path
+
+    if pref_path:
+        try:
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            sys.path.insert(0, script_dir)
+            from learn_preferences import load_preferences
+            user_preferences = load_preferences(pref_path)
+            if user_preferences:
+                fb_count = user_preferences.get('total_feedback_count', 0)
+                logger.info("Loaded user preferences (%d feedback entries)", fb_count)
+            else:
+                logger.info("No valid preferences file found at %s", pref_path)
+        except ImportError:
+            logger.warning("learn_preferences module not found, skipping preference loading")
 
     # 解析目标日期
     target_date = None
@@ -915,7 +1001,8 @@ def main():
             papers=recent_papers,
             config=config,
             target_date=target_date,
-            is_hot_paper_batch=False
+            is_hot_paper_batch=False,
+            preferences=user_preferences
         )
         logger.info("Scored %d recent papers", len(scored_recent))
         all_scored_papers.extend(scored_recent)
@@ -941,7 +1028,8 @@ def main():
                 papers=hot_papers,
                 config=config,
                 target_date=target_date,
-                is_hot_paper_batch=True
+                is_hot_paper_batch=True,
+                preferences=user_preferences
             )
             logger.info("Scored %d hot papers", len(scored_hot))
             all_scored_papers.extend(scored_hot)

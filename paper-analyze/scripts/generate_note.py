@@ -52,148 +52,129 @@ related_papers: []
 created: "{date}"
 updated: "{date}"
 status: analyzed
+feedback: ""
+feedback_reasons: []
+feedback_date: ""
 ---
 
 # {title}
 
-## 核心信息
-- **论文ID**：{paper_id}
-- **作者**：{authors}
-- **机构**：[从作者推断或查看论文]
-- **发布时间**：{date}
-- **会议/期刊**：[从categories推断]
-- **链接**：[arXiv](https://arxiv.org/abs/{paper_id}) | [PDF](https://arxiv.org/pdf/{paper_id})
-- **引用**：[如果可获取]
+> **论文ID**：{paper_id} | **作者**：{authors} | **链接**：[arXiv](https://arxiv.org/abs/{paper_id}) | [PDF](https://arxiv.org/pdf/{paper_id})
 
-## 研究问题
-[问题描述中文翻译和解释]
+## 一句话总结
 
-## 方法概述
+[用一句话概括这篇论文做了什么、解决了什么问题、达到了什么效果]
 
-### 核心方法
+## 背景：作者想解决什么问题？
 
-1. [方法1]
-   - [详细描述]
-   - [关键步骤]
-   - [创新点]
+[简要介绍研究背景，让读者快速理解：]
+[- 这个领域现在是什么状况？]
+[- 现有方法有什么痛点或瓶颈？]
+[- 作者的出发点是什么？]
 
-### 数学公式（Markdown LaTeX）
-- 行内公式请使用 `$...$`
-- 块级公式请使用 `$$...$$` 并单独成行
-- 行内示例：目标函数为 $L(\\theta)$。
-- 块级示例：
-    $$\\theta^* = \\arg\\min_\\theta L(\\theta)$$
+## 贡献与方法：怎么解决的？
 
-### 方法架构
-[架构描述和图片引用]
+### 核心贡献
 
-### 关键创新
+[列出论文的主要贡献，通常 2-4 点]
 
-1. [创新点1] - [为什么重要]
-2. [创新点2] - [为什么重要]
-3. [创新点3] - [为什么重要]
+### 方法详解
+
+[这一部分是重点，需要详细展开，让读者能看懂作者的思路]
+[不要过度简化——如果方法有多个关键模块，逐一解释清楚]
+[善用论文中的图来辅助说明]
+
+[插入论文架构图/方法图：]
+![[figure_name.png|800]]
+
+[如果有重要的数学公式，用 LaTeX 展示：]
+[行内公式 $L(\\theta)$，块级公式：]
+$$\\theta^* = \\arg\\min_\\theta L(\\theta)$$
+
+[如果方法有多个阶段/模块，分小节展开：]
+
+#### [模块/阶段1名称]
+
+[详细说明这个模块做了什么、为什么这样设计]
+
+#### [模块/阶段2名称]
+
+[详细说明]
+
+#### [模块/阶段3名称]
+
+[详细说明]
 
 ## 实验结果
 
-### 数据集
-- [数据集1]：[规模、特点]
-- [数据集2]：[规模、特点]
+[简述关键实验结果，不需要贴所有表格，抓重点：]
+[- 在哪些数据集/任务上测试？]
+[- 跟哪些方法比？结果如何？]
+[- 有没有值得关注的消融实验结论？]
 
-### 实验设置
-- **基线方法**：[列出对比方法]
-- **评估指标**：[列出指标]
-- **实验环境**：[硬件、超参数]
+[可以插入关键结果图表：]
+![[results_figure.png|800]]
 
-### 主要结果
-[实验结果表格和关键发现]
+## 锐评
 
-## 深度分析
+[一段客观但有态度的点评，例如：]
+[- 这篇论文的核心价值在哪里？是方法创新、工程突破还是纯堆工作量？]
+[- 实验是否有说服力？有没有明显的问题或遗漏？]
+[- 对这个领域有多大影响？值不值得跟进？]
+[- 一句话定性：开创性/扎实推进/中规中矩/增量灌水/纯工程堆量]
 
-### 研究价值
-- **理论贡献**：[理论上的贡献]
-- **实际应用**：[实际应用价值]
-- **领域影响**：[对研究领域的潜在影响]
+**总体评分**：[X.X/10]
 
-### 优势
-- [优势1]
-- [优势2]
-- [优势3]
+## Benchmark 记录
 
-### 局限性
-- [局限1]
-- [局限2]
-- [局限3]
+| Benchmark | 任务类型 | 本文结果 | SOTA 参考 |
+|-----------|----------|----------|-----------|
+| [benchmark] | [类型] | [结果] | [参考值] |
 
-### 适用场景
-- [适用场景1]
-- [适用场景2]
+## 技术感悟
 
-## 与相关论文对比
-
-### [[相关论文1]] - [对比关系]
-- **差异**：[本文方法的不同之处]
-- **改进**：[相比的改进点]
-- **性能对比**：[如果可用]
-
-### [[相关论文2]] - [对比关系]
-[类似格式]
-
-### [[相关论文3]] - [对比关系]
-[类似格式]
-
-## 技术路线定位
-
-本文属于[技术路线]，主要关注[具体子方向]。
-
-## 未来工作建议
-
-1. [作者建议1]
-2. [作者建议2]
-3. [基于分析的延伸建议]
-
-## 我的综合评价
-
-### 价值评分
-- **总体评分**：[X.X/10]
-- **分项评分**：
-  - 创新性：[X/10]
-  - 技术质量：[X/10]
-  - 实验充分性：[X/10]
-  - 写作质量：[X/10]
-  - 实用性：[X/10]
-
-### 突出亮点
-- [亮点1]
-- [亮点2]
-- [亮点3]
-
-### 重点关注
-- [需要特别关注的方面]
-
-### 可借鉴点
-- [可以学习借鉴的技术]
-- [可以应用的方法]
-- [有启发性的思路]
-
-### 批判性思考
-- [潜在问题]
-- [可改进之处]
-- [质疑点]
+[2-3 段个人技术洞察：]
+[- 这篇工作给我什么启发？]
+[- 哪些思路可以借鉴到自己的研究中？]
+[- 这个方向接下来可能往哪走？]
 
 ## 我的笔记
 
-[用户阅读后手动补充的内容]
+[阅读后手动补充的想法、启发、可借鉴的点]
+
+## 论文反馈
+
+在 frontmatter 中编辑以下字段来记录你的反馈：
+
+- **feedback**: 填写 `like` 或 `dislike`
+- **feedback_reasons**: 从以下标签中选择（可多选）
+- **feedback_date**: 填写评价日期
+
+**正向标签：**
+| 标签 | 含义 |
+|------|------|
+| `topic_match` | 主题契合我的研究方向 |
+| `known_researcher` | 知名学者/大机构出品 |
+| `novel_methodology` | 方法新颖有启发 |
+| `practical` | 实用性强，可直接应用 |
+| `good_writing` | 写作清晰易懂 |
+| `comprehensive_experiments` | 实验充分扎实 |
+
+**负向标签：**
+| 标签 | 含义 |
+|------|------|
+| `topic_mismatch` | 主题不相关 |
+| `incremental` | 工作增量太小 |
+| `poor_quality` | 质量不佳 |
+| `already_known` | 已经了解的内容 |
 
 ## 相关论文
-- [[相关论文1]] - [对比关系]
-- [[相关论文2]] - [对比关系]
-- [[相关论文3]] - [对比关系]
+- [[相关论文1]] - [关系]
+- [[相关论文2]] - [关系]
 
 ## 外部资源
-- [论文链接]
 - [代码链接（如果有）]
 - [项目主页（如果有）]
-- [相关资源]
 '''
     else:
         # English template
@@ -219,148 +200,129 @@ related_papers: []
 created: "{date}"
 updated: "{date}"
 status: analyzed
+feedback: ""
+feedback_reasons: []
+feedback_date: ""
 ---
 
 # {title}
 
-## Core Information
-- **Paper ID**: {paper_id}
-- **Authors**: {authors}
-- **Affiliation**: [Infer from authors or check paper]
-- **Publication Date**: {date}
-- **Conference/Journal**: [Infer from categories]
-- **Links**: [arXiv](https://arxiv.org/abs/{paper_id}) | [PDF](https://arxiv.org/pdf/{paper_id})
-- **Citations**: [If available]
+> **Paper ID**: {paper_id} | **Authors**: {authors} | **Links**: [arXiv](https://arxiv.org/abs/{paper_id}) | [PDF](https://arxiv.org/pdf/{paper_id})
 
-## Research Problem
-[Problem description and explanation]
+## TL;DR
 
-## Method Overview
+[One sentence summary: what this paper does, what problem it solves, what it achieves]
 
-### Core Method
+## Background: What Problem Are They Solving?
 
-1. [Method 1]
-   - [Detailed description]
-   - [Key steps]
-   - [Innovation points]
+[Brief introduction to set the context:]
+[- What is the current state of this field?]
+[- What are the pain points or bottlenecks of existing methods?]
+[- What motivated the authors?]
 
-### Mathematical Formula (Markdown LaTeX)
-- Use `$...$` for inline formulas
-- Use `$$...$$` on a separate line for block formulas
-- Inline example: The objective is $L(\\theta)$.
-- Block example:
-    $$\\theta^* = \\arg\\min_\\theta L(\\theta)$$
+## Contributions & Method: How Do They Solve It?
 
-### Method Architecture
-[Architecture description and image references]
+### Key Contributions
 
-### Key Innovations
+[List the main contributions, typically 2-4 points]
 
-1. [Innovation 1] - [Why important]
-2. [Innovation 2] - [Why important]
-3. [Innovation 3] - [Why important]
+### Method Details
+
+[This is the core section — explain in detail so readers can understand the approach]
+[Don't oversimplify — if the method has multiple key modules, explain each clearly]
+[Use figures from the paper to aid explanation]
+
+[Insert architecture/method figures:]
+![[figure_name.png|800]]
+
+[Important math formulas in LaTeX:]
+[Inline $L(\\theta)$, block:]
+$$\\theta^* = \\arg\\min_\\theta L(\\theta)$$
+
+[If the method has multiple stages/modules, use subsections:]
+
+#### [Module/Stage 1 Name]
+
+[Detailed explanation of what this module does and why]
+
+#### [Module/Stage 2 Name]
+
+[Detailed explanation]
+
+#### [Module/Stage 3 Name]
+
+[Detailed explanation]
 
 ## Experimental Results
 
-### Datasets
-- [Dataset 1]: [Scale, characteristics]
-- [Dataset 2]: [Scale, characteristics]
+[Summarize key results — focus on what matters:]
+[- Which datasets/tasks were used?]
+[- What baselines were compared? How did it perform?]
+[- Any notable ablation findings?]
 
-### Experimental Settings
-- **Baseline Methods**: [List comparison methods]
-- **Evaluation Metrics**: [List metrics]
-- **Experimental Environment**: [Hardware, hyperparameters]
+[Insert key results figures/tables:]
+![[results_figure.png|800]]
 
-### Main Results
-[Experimental results table and key findings]
+## Verdict
 
-## Deep Analysis
+[An objective but opinionated critique, e.g.:]
+[- Where is the core value? Methodological innovation, engineering breakthrough, or brute-force effort?]
+[- Are the experiments convincing? Any obvious gaps?]
+[- How impactful is this for the field? Worth following up?]
+[- One-line verdict: Groundbreaking / Solid advance / Average / Incremental / Engineering-heavy]
 
-### Research Value
-- **Theoretical Contribution**: [Theoretical contribution]
-- **Practical Applications**: [Practical application value]
-- **Field Impact**: [Potential impact on research field]
+**Overall Score**: [X.X/10]
 
-### Advantages
-- [Advantage 1]
-- [Advantage 2]
-- [Advantage 3]
+## Benchmark Records
 
-### Limitations
-- [Limitation 1]
-- [Limitation 2]
-- [Limitation 3]
+| Benchmark | Task Type | This Paper | SOTA Reference |
+|-----------|-----------|------------|----------------|
+| [benchmark] | [type] | [result] | [reference] |
 
-### Applicable Scenarios
-- [Scenario 1]
-- [Scenario 2]
+## Technical Insights
 
-## Comparison with Related Papers
-
-### [[Related Paper 1]] - [Relationship]
-- **Difference**: [How this method differs]
-- **Improvement**: [Improvements compared to others]
-- **Performance Comparison**: [If available]
-
-### [[Related Paper 2]] - [Relationship]
-[Similar format]
-
-### [[Related Paper 3]] - [Relationship]
-[Similar format]
-
-## Technical Track Positioning
-
-This paper belongs to [technical track], focusing on [specific sub-direction].
-
-## Future Work Suggestions
-
-1. [Author's suggestion 1]
-2. [Author's suggestion 2]
-3. [Extension suggestions based on analysis]
-
-## My Comprehensive Evaluation
-
-### Value Scoring
-- **Overall Score**: [X.X/10]
-- **Breakdown**:
-  - Innovation: [X/10]
-  - Technical Quality: [X/10]
-  - Experiment Thoroughness: [X/10]
-  - Writing Quality: [X/10]
-  - Practicality: [X/10]
-
-### Highlights
-- [Highlight 1]
-- [Highlight 2]
-- [Highlight 3]
-
-### Key Points to Focus On
-- [Aspects that need special attention]
-
-### Learnings
-- [Techniques to learn from]
-- [Methods to apply]
-- [Inspiring ideas]
-
-### Critical Thinking
-- [Potential issues]
-- [Areas for improvement]
-- [Points of contention]
+[2-3 paragraphs of personal technical observations:]
+[- What inspiration does this work provide?]
+[- Which ideas could be applied to my own research?]
+[- Where might this direction go next?]
 
 ## My Notes
 
-[Content to be added manually after reading]
+[Personal thoughts, inspirations, takeaways after reading]
+
+## Paper Feedback
+
+Edit these fields in the frontmatter to record your feedback:
+
+- **feedback**: Set to `like` or `dislike`
+- **feedback_reasons**: Pick from the tags below (multiple allowed)
+- **feedback_date**: Date of your feedback
+
+**Positive tags:**
+| Tag | Meaning |
+|-----|---------|
+| `topic_match` | Matches my research interests |
+| `known_researcher` | Well-known author/institution |
+| `novel_methodology` | Novel and inspiring approach |
+| `practical` | Highly practical, directly applicable |
+| `good_writing` | Clear and well-written |
+| `comprehensive_experiments` | Thorough experiments |
+
+**Negative tags:**
+| Tag | Meaning |
+|-----|---------|
+| `topic_mismatch` | Not relevant to my interests |
+| `incremental` | Too incremental |
+| `poor_quality` | Low quality |
+| `already_known` | Already familiar content |
 
 ## Related Papers
 - [[Related Paper 1]] - [Relationship]
 - [[Related Paper 2]] - [Relationship]
-- [[Related Paper 3]] - [Relationship]
 
 ## External Resources
-- [Paper links]
 - [Code links (if available)]
 - [Project homepage (if available)]
-- [Related resources]
 '''
 
 

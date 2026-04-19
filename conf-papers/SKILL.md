@@ -61,6 +61,13 @@ python scripts/scan_existing_notes.py \
 
 ## 步骤3：搜索顶会论文
 
+首先运行偏好学习（如果有用户反馈数据）：
+
+```bash
+cd "$(dirname "$SKILL_DIR")/start-my-day"
+python scripts/learn_preferences.py --vault "$OBSIDIAN_VAULT_PATH"
+```
+
 使用 `scripts/search_conf_papers.py` 完成搜索、补充和评分：
 
 ```bash
@@ -69,7 +76,8 @@ python scripts/search_conf_papers.py \
   --config "$SKILL_DIR/conf-papers.yaml" \
   --output conf_papers_filtered.json \
   --year {年份} \
-  --conferences "{会议列表，逗号分隔}"
+  --conferences "{会议列表，逗号分隔}" \
+  --preferences "$OBSIDIAN_VAULT_PATH/99_System/Config/user_preferences.json"
 ```
 
 > 注意：`--config` 默认指向 skill 目录下的 `conf-papers.yaml`，通常不需要手动指定。`--year` 和 `--conferences` 未指定时使用配置文件中的默认值。
@@ -163,6 +171,18 @@ cat conf_papers_filtered.json
 
 **关键结果**：[从摘要中提取的最重要结果]
 
+**相关工作对比**：
+| 对比方法 | 核心思路 | 与本文关系 |
+|----------|----------|------------|
+| [方法1] | [一句话] | [改进/扩展/对比] |
+| [方法2] | [一句话] | [改进/扩展/对比] |
+
+**技术路线**：[所属方向] — [本文在该路线中的位置和贡献，1-2句话]
+
+**Benchmark**：[列出使用的知名 benchmark，如 [[MMLU]] / [[HumanEval]] / [[GSM8K]] 等，附本文结果]
+
+**技术感悟**：[1-2句话：这篇工作的启发点或可借鉴之处]
+
 ---
 ```
 
@@ -184,6 +204,18 @@ cat conf_papers_filtered.json
 - [Contribution 3]
 
 **Key Results**: [most important results from abstract]
+
+**Related Work Comparison**:
+| Method | Core Idea | Relation to This Paper |
+|--------|-----------|------------------------|
+| [method1] | [one line] | [improves/extends/compares] |
+| [method2] | [one line] | [improves/extends/compares] |
+
+**Technical Roadmap**: [research direction] — [position and contribution, 1-2 sentences]
+
+**Benchmarks**: [list notable benchmarks used, e.g. [[MMLU]] / [[HumanEval]] / [[GSM8K]], with results]
+
+**Technical Insights**: [1-2 sentences: key takeaway or ideas to borrow]
 
 ---
 ```
@@ -385,13 +417,18 @@ python scripts/link_keywords.py \
 
 3. **搜索和筛选顶会论文**
    ```bash
+   # 先运行偏好学习
+   cd "$(dirname "$SKILL_DIR")/start-my-day"
+   python scripts/learn_preferences.py --vault "$OBSIDIAN_VAULT_PATH"
+   # 搜索（带偏好）
    cd "$SKILL_DIR"
    python scripts/search_conf_papers.py \
      --config "$SKILL_DIR/conf-papers.yaml" \
      --output conf_papers_filtered.json \
      --year {年份} \
      --conferences "{会议列表}" \
-     --top-n 10
+     --top-n 10 \
+     --preferences "$OBSIDIAN_VAULT_PATH/99_System/Config/user_preferences.json"
    ```
 
 4. **读取筛选结果**
