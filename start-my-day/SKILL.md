@@ -316,6 +316,8 @@ Today's {paper_count} recommended papers focus on **{direction1}**, **{direction
 
 **Technical Insights**: [1-2 sentences: key takeaway or ideas to borrow]
 
+**Feedback**: `like` / `dislike` / --  *(edit inline to record preference)*
+
 ---
 ```
 
@@ -348,6 +350,8 @@ Today's {paper_count} recommended papers focus on **{direction1}**, **{direction
 **Benchmark**：[列出使用的知名 benchmark，如 [[MMLU]] / [[HumanEval]] / [[GSM8K]] 等，附本文结果]
 
 **技术感悟**：[1-2句话：这篇工作的启发点或可借鉴之处]
+
+**反馈**：`like` / `dislike` / --  *（在行内编辑记录偏好）*
 
 ---
 ```

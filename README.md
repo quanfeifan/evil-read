@@ -9,62 +9,117 @@
 
 ## 简介
 
-这是一套 Claude Code 技能（Skills）集合，用于自动化研究论文的搜索、推荐、分析和整理工作流。通过调用 arXiv 和 Semantic Scholar API，每天为你推荐高质量论文，并自动生成详细笔记和关系图谱。
+一套 Claude Code 技能（Skills）集合，自动化研究论文的搜索、推荐、分析和整理。通过 arXiv + Semantic Scholar API 每天推荐高质量论文，自动生成详细笔记，并通过反馈闭环持续优化推荐精度。
 
 ## 更新日志
 
 | 日期 | 版本 | 更新内容 |
 |------|------|----------|
-| 2026-03-13 | v1.1 | 新增 `conf-papers` 技能：支持搜索 CVPR/ICCV/ECCV/ICLR/AAAI/NeurIPS/ICML 等顶级会议论文，基于 DBLP + Semantic Scholar 双数据源，独立配置文件，三维评分推荐 |
-| 2026-03-01 | v1.0 | 初始版本：start-my-day 每日推荐、paper-analyze 论文分析、extract-paper-images 图片提取、paper-search 论文搜索 |
+| 2026-05-24 | v1.2 | 新增**反馈学习系统**：细粒度主题级反馈复选框、增量偏好收集、关键词权重自动调整 |
+| 2026-03-13 | v1.1 | 新增 `conf-papers` 技能：顶会论文搜索，DBLP + Semantic Scholar 双数据源 |
+| 2026-03-01 | v1.0 | 初始版本：start-my-day、paper-analyze、extract-paper-images、paper-search |
 
-## 功能特点
+## 核心功能
 
 ### 1. start-my-day - 每日论文推荐
-- 从 arXiv 搜索最近一个月的论文
-- 从 Semantic Scholar 搜索过去一年的高热度论文
-- 基于相关性、新近性、热门度、质量四个维度综合评分
-- 自动生成今日概览和推荐列表
-- 前三篇论文自动生成详细分析和提取图片
+
+每天一条命令，获取个性化论文推荐：
+
+- 搜索 arXiv 最近一个月的论文 + Semantic Scholar 过去一年的高热度论文
+- 四维评分：相关性 40% + 热门度 30% + 新近性 20% + 质量 10%
+- 生成今日概览 + 10 篇推荐列表
+- 前 3 篇自动提取图片、生成详细分析报告
 - 自动链接关键词到已有笔记
 
-### 2. paper-analyze - 论文深度分析
-- 深度分析单篇论文
-- 生成结构化笔记，包含：
-  - 摘要翻译和要点提炼
-  - 研究背景与动机
-  - 方法概述和架构
-  - 实验结果分析
-  - 研究价值评估
-  - 优势和局限性分析
-  - 与相关论文对比
-- 自动提取论文图片并插入笔记
+### 2. 反馈学习系统（v1.2 新增）
+
+推荐不只是单向输出，系统会从你的反馈中学习：
+
+**工作流程：**
+
+```
+今天：推荐 10 篇论文，每篇带细粒度主题复选框
+        ↓
+你在 Obsidian 中勾选感兴趣/不感兴趣 + 具体主题
+        ↓
+明天运行时：自动收集昨天的反馈（增量，不扫描全量历史）
+        ↓
+合并到累积偏好 → 调整关键词权重 → 影响今天的推荐排名
+```
+
+**细粒度主题反馈：**
+
+每篇论文不是简单的"喜欢/不喜欢"，而是可以标记具体感兴趣的方向：
+
+```markdown
+**反馈**：
+- [x] 感兴趣 ⬆️
+  - [x] VLA模型           ← 勾选具体感兴趣的主题
+  - [ ] 运行时验证/安全部署
+  - [x] 世界模型
+  - [ ] 动作质量评估
+- [ ] 不感兴趣 ⬇️
+  - [ ] VLA模型
+  - [ ] 运行时验证/安全部署
+  - [ ] 世界模型
+  - [ ] 动作质量评估
+```
+
+**偏好存储：**
+
+| 文件 | 作用 |
+|------|------|
+| `user_preferences_state.yaml` | 内部状态：累积的关键词正/负计数 + 已处理日期列表 |
+| `user_preferences.yaml` | 给评分脚本用的：从累积计数计算出的 boosts/penalties |
+
+两个文件都在 `$OBSIDIAN_VAULT_PATH/99_System/Config/` 下，增量更新，幂等（同一天重复运行不会重复计数）。
+
+### 3. paper-analyze - 论文深度分析
+
+```bash
+/paper-analyze 2602.12345
+```
+
+- 生成结构化笔记：研究背景、方法架构、实验结果、价值评估、相关论文对比
+- 自动提取所有论文图片并插入笔记
 - 更新知识图谱
 
-### 3. extract-paper-images - 论文图片提取
-- 优先从 arXiv 源码包提取高质量图片
-- 支持从 PDF 提取图片作为备选
-- 自动生成图片索引
-- 保存到笔记目录的 images 子目录
+### 4. extract-paper-images - 论文图片提取
 
-### 4. paper-search - 论文笔记搜索
-- 在已有笔记中搜索论文
-- 支持按标题、作者、关键词、领域搜索
-- 相关性评分排序
+```bash
+/extract-paper-images 2602.12345
+```
 
-### 5. conf-papers - 顶会论文搜索推荐
-- 搜索 CVPR/ICCV/ECCV/ICLR/AAAI/NeurIPS/ICML 等顶级会议论文
-- 基于 DBLP API 获取论文列表 + Semantic Scholar 补充引用和摘要
-- 独立配置文件 `conf-papers.yaml`（关键词、排除词、默认年份/会议）
-- 两阶段过滤：标题关键词轻量筛选 → S2 补充 → 三维评分（相关性 40% + 热门度 40% + 质量 20%）
-- 前三篇论文自动生成详细分析（需有 arXiv ID）
+- 优先从 arXiv 源码包提取（高质量原图）
+- 回退到 PDF 提取
+- 支持 TikZ/PGFplots 矢量图裁剪
+- 自动过滤 logo 和小图标
+
+### 5. paper-search - 论文笔记搜索
+
+```bash
+/paper-search "关键词"
+```
+
+在已有笔记中按标题、作者、关键词、领域搜索，相关性排序。
+
+### 6. conf-papers - 顶会论文搜索
+
+```bash
+/conf-papers CVPR 2025
+```
+
+- 支持 CVPR/ICCV/ECCV/ICLR/AAAI/NeurIPS/ICML
+- DBLP API 获取论文列表 + Semantic Scholar 补充引用和摘要
+- 独立配置文件 `conf-papers.yaml`
+- 三维评分：相关性 40% + 热门度 40% + 质量 20%
 
 ## 安装
 
 ### 前置要求
 
-1. **Claude Code CLI** - 需要安装并配置 Claude Code
-2. **Python 3.8+** - 用于运行搜索和分析脚本
+1. **Claude Code CLI** - 安装并配置
+2. **Python 3.8+**
 3. **依赖库**：
    ```bash
    pip install -r requirements.txt
@@ -72,295 +127,217 @@
 
 ### 安装步骤
 
-1. 将此仓库克隆或复制到你的 Claude Code skills 目录：
-   ```bash
-   # Windows PowerShell
-   Copy-Item -Recurse evil-read-arxiv\start-my-day $env:USERPROFILE\.claude\skills\
-   Copy-Item -Recurse evil-read-arxiv\paper-analyze $env:USERPROFILE\.claude\skills\
-   Copy-Item -Recurse evil-read-arxiv\extract-paper-images $env:USERPROFILE\.claude\skills\
-   Copy-Item -Recurse evil-read-arxiv\paper-search $env:USERPROFILE\.claude\skills\
+1. 克隆仓库并复制技能到 Claude Code skills 目录：
 
+   ```bash
    # macOS/Linux
    cp -r evil-read-arxiv/start-my-day ~/.claude/skills/
    cp -r evil-read-arxiv/paper-analyze ~/.claude/skills/
    cp -r evil-read-arxiv/extract-paper-images ~/.claude/skills/
    cp -r evil-read-arxiv/paper-search ~/.claude/skills/
+   cp -r evil-read-arxiv/conf-papers ~/.claude/skills/
+
+   # Windows PowerShell
+   Copy-Item -Recurse evil-read-arxiv\start-my-day $env:USERPROFILE\.claude\skills\
+   Copy-Item -Recurse evil-read-arxiv\paper-analyze $env:USERPROFILE\.claude\skills\
+   Copy-Item -Recurse evil-read-arxiv\extract-paper-images $env:USERPROFILE\.claude\skills\
+   Copy-Item -Recurse evil-read-arxiv\paper-search $env:USERPROFILE\.claude\skills\
+   Copy-Item -Recurse evil-read-arxiv\conf-papers $env:USERPROFILE\.claude\skills\
    ```
 
-2. 配置环境变量和路径（见下文"配置"部分）
-
-3. 重启 Claude Code CLI
+2. 配置环境变量和研究兴趣（见下文"配置"部分）
+3. 重启 Claude Code
 
 ## 配置
 
-> **强烈建议**：先阅读 [QUICKSTART.md](QUICKSTART.md) 快速完成设置。
+> **快速开始**：先阅读 [QUICKSTART.md](QUICKSTART.md)。
 
-### 步骤1：设置环境变量（推荐）
-
-所有脚本统一通过 `OBSIDIAN_VAULT_PATH` 环境变量读取 Obsidian Vault 路径，这是最简单的配置方式：
+### 步骤 1：设置 Obsidian Vault 路径
 
 ```bash
-# Windows PowerShell（临时生效）
-$env:OBSIDIAN_VAULT_PATH = "C:/Users/YourName/Documents/Obsidian Vault"
+# macOS/Linux（添加到 ~/.bashrc 或 ~/.zshrc）
+export OBSIDIAN_VAULT_PATH="/path/to/your/obsidian/vault"
 
 # Windows PowerShell（永久生效）
-[System.Environment]::SetEnvironmentVariable("OBSIDIAN_VAULT_PATH", "C:/Users/YourName/Documents/Obsidian Vault", "User")
-
-# macOS/Linux（添加到 ~/.bashrc 或 ~/.zshrc）
-export OBSIDIAN_VAULT_PATH="/Users/yourname/Documents/Obsidian Vault"
+[System.Environment]::SetEnvironmentVariable("OBSIDIAN_VAULT_PATH", "C:/Users/YourName/Documents/Vault", "User")
 ```
 
-设置环境变量后，**无需修改任何脚本中的路径**。
-
-### 步骤2：创建配置文件
+### 步骤 2：创建研究兴趣配置
 
 复制 `config.example.yaml` 并修改：
 
 ```bash
-cp config.example.yaml config.yaml
+cp config.example.yaml "$OBSIDIAN_VAULT_PATH/99_System/Config/research_interests.yaml"
 ```
 
-编辑 `config.yaml`，根据你的研究兴趣修改关键词：
+配置示例：
 
 ```yaml
-vault_path: "/path/to/your/obsidian/vault"
+language: "zh"  # 支持 "zh"（中文）或 "en"（英文）
 
 research_domains:
-  "你的研究领域1":
+  "VLA模型":
+    priority: 5
     keywords:
-      - "keyword1"
-      - "keyword2"
+      - "vision-language-action"
+      - "VLA"
+      - "robot manipulation"
+    arxiv_categories:
+      - "cs.RO"
+      - "cs.AI"
+
+  "世界模型":
+    priority: 5
+    keywords:
+      - "world model"
+      - "sim-to-real"
     arxiv_categories:
       - "cs.AI"
       - "cs.LG"
 ```
 
-然后将修改后的 `config.yaml` 复制到 Vault 中：
-```bash
-cp config.yaml "$OBSIDIAN_VAULT_PATH/99_System/Config/research_interests.yaml"
-```
-
-### 步骤3（可选）：通过 CLI 参数覆盖路径
-
-如果不想设置环境变量，也可以在每次调用脚本时通过参数指定路径：
-
-```bash
-python scripts/search_arxiv.py --config "/your/path/research_interests.yaml"
-python scripts/scan_existing_notes.py --vault "/your/obsidian/vault"
-python scripts/generate_note.py --vault "/your/obsidian/vault" --paper-id "2402.12345" --title "Paper Title" --authors "Author" --domain "大模型"
-python scripts/update_graph.py --vault "/your/obsidian/vault" --paper-id "2402.12345" --title "Paper Title" --domain "大模型"
-```
-
-### 路径格式说明
-
-- **Windows**：可以使用正斜杠 `/` 或双反斜杠 `\\`
-  - 正确：`C:/Users/Name/Documents/Vault`
-  - 正确：`C:\\Users\\Name\\Documents\\Vault`
-  - 错误：`C:\Users\Name\Documents\Vault`（单反斜杠在 Python 字符串中需要转义）
-
-- **macOS/Linux**：使用正斜杠 `/`
-  - 正确：`/Users/name/Documents/Vault`
-
-### Obsidian 目录结构要求
-
-你的 Obsidian Vault 需要包含以下目录结构：
+### Obsidian 目录结构
 
 ```
 你的Vault/
-├── 10_Daily/                    # 每日推荐笔记（自动创建）
-│   └── YYYY-MM-DD论文推荐.md
-├── 20_Research/
-│   └── Papers/                  # 论文详细笔记目录
-│       ├── 大模型/
-│       │   └── 论文标题.md
-│       │       └── images/      # 论文图片
-│       ├── 多模态技术/
-│       └── 智能体/
+├── Daily/                       # 每日推荐笔记
+│   └── 2026-05-24论文推荐.md
+├── Papers/                      # 论文详细笔记
+│   ├── VLA模型/
+│   │   └── Pre-VLA_.../
+│   │       ├── Pre-VLA_...md    # 分析笔记
+│   │       └── images/          # 论文图片
+│   ├── 世界模型/
+│   └── 3D视觉/
 └── 99_System/
     └── Config/
-        └── research_interests.yaml  # 研究兴趣配置（复制 config.yaml 到这里）
+        ├── research_interests.yaml      # 研究兴趣配置
+        ├── user_preferences.yaml        # 反馈偏好（自动生成）
+        └── user_preferences_state.yaml  # 偏好累积状态（自动生成）
 ```
 
 ## 使用方法
 
-### 开始每天的论文推荐
-
-在你的 Obsidian Vault 目录下打开终端，输入：
+### 每日推荐
 
 ```bash
-start my day
+/start-my-day           # 生成今天的推荐
+/start-my-day 2026-05-20  # 生成指定日期的推荐
 ```
 
-这会：
-1. 搜索最近一个月和过去一年的高质量论文
-2. 根据你的研究兴趣筛选和评分
-3. 生成今日推荐笔记（保存到 `10_Daily/` 目录）
-4. 对前三篇论文自动生成详细分析
-5. 提取论文图片并插入笔记
-6. 自动链接关键词到已有笔记
+执行流程：
+1. 收集前一天的反馈（增量合并到偏好文件）
+2. 搜索 arXiv + Semantic Scholar
+3. 基于研究兴趣 + 用户偏好综合评分
+4. 生成推荐笔记（含细粒度反馈复选框）
+5. 前 3 篇自动提取图片 + 生成详细分析
 
-### 分析单篇论文
+### 反馈使用
 
-如果你想深入阅读某篇论文：
+1. 在 Obsidian 中打开今日推荐笔记
+2. 对感兴趣的论文勾选 `[x] 感兴趣`，并勾选具体感兴趣的主题
+3. 对不感兴趣的论文勾选 `[x] 不感兴趣`，同样可勾选具体主题
+4. 下次运行 `/start-my-day` 时自动生效
+
+### 单篇论文分析
 
 ```bash
-paper-analyze 2602.12345
-# 或使用论文标题
-paper-analyze "论文标题"
+/paper-analyze 2602.12345
+/paper-analyze "论文标题"
 ```
 
-这会：
-1. 下载论文 PDF
-2. 提取图片
-3. 生成详细的分析笔记
-4. 更新知识图谱
-
-### 提取论文图片
+### 顶会论文搜索
 
 ```bash
-extract-paper-images 2602.12345
+/conf-papers CVPR 2025
+/conf-papers NeurIPS 2024 --top-n 20
 ```
 
-### 搜索已有论文
+## 评分机制
 
-```bash
-paper-search "关键词"
-```
+| 维度 | 权重 | 说明 |
+|------|------|------|
+| 相关性 | 40% | 关键词匹配（标题 +0.5/个，摘要 +0.3/个）+ 类别匹配（+1.0）+ **用户偏好加权** |
+| 热门度 | 30% | 引用数 > 100（+3）、50-100（+2）、< 50（+1） |
+| 新近性 | 20% | 30 天内（+3）、30-90 天（+2）、90-180 天（+1） |
+| 质量 | 10% | 从摘要推断的方法创新性和实验质量 |
+
+**用户偏好调整**：在基础评分之上，根据 `user_preferences.yaml` 中的关键词权重进行加减分。例如你多次对"VLA模型"主题点了感兴趣，后续含 VLA 关键词的论文会获得额外加分。
 
 ## 目录结构
 
 ```
 evil-read-arxiv/
-├── README.md                 # 本文件
-├── QUICKSTART.md             # 快速开始指南
-├── config.example.yaml       # 配置模板（需要复制并修改）
-├── requirements.txt          # Python 依赖
-├── start-my-day/             # 每日推荐技能
-│   ├── SKILL.md              # 技能定义文件
-│   └── scripts/
-│       ├── search_arxiv.py   # arXiv/Semantic Scholar 搜索脚本
-│       ├── scan_existing_notes.py  # 扫描现有笔记
-│       └── link_keywords.py  # 关键词自动链接脚本
-├── paper-analyze/            # 论文分析技能
+├── README.md
+├── QUICKSTART.md
+├── config.example.yaml           # 配置模板
+├── requirements.txt
+├── start-my-day/                 # 每日推荐
 │   ├── SKILL.md
 │   └── scripts/
-│       ├── generate_note.py  # 生成笔记模板
-│       └── update_graph.py   # 更新知识图谱
-├── extract-paper-images/     # 图片提取技能
+│       ├── search_arxiv.py       # arXiv/S2 搜索 + 偏好加权评分
+│       ├── collect_feedback.py   # 增量反馈收集
+│       ├── scan_existing_notes.py
+│       └── link_keywords.py
+├── paper-analyze/                # 论文深度分析
 │   ├── SKILL.md
 │   └── scripts/
-│       └── extract_images.py # 图片提取脚本
-├── paper-search/             # 论文搜索技能
+├── extract-paper-images/         # 图片提取
+│   ├── SKILL.md
+│   └── scripts/
+├── paper-search/                 # 论文搜索
 │   └── SKILL.md
-└── conf-papers/              # 顶会论文搜索推荐技能
-    ├── SKILL.md              # 技能定义文件
-    ├── conf-papers.yaml      # 独立配置（关键词、会议、年份）
+└── conf-papers/                  # 顶会论文搜索
+    ├── SKILL.md
+    ├── conf-papers.yaml
     └── scripts/
-        └── search_conf_papers.py  # DBLP搜索 + S2补充 + 评分
 ```
-
-## 评分机制
-
-论文推荐评分基于四个维度：
-
-| 维度 | 权重 | 说明 |
-|------|--------|------|
-| 相关性 | 40% | 与研究兴趣的匹配程度 |
-| 新近性 | 20% | 论文发布时间 |
-| 热门度 | 30% | 引用数/影响力 |
-| 质量 | 10% | 从摘要推断的方法质量 |
-
-**评分细则**：
-- **相关性**：标题关键词匹配（+0.5/个）、摘要关键词匹配（+0.3/个）、类别匹配（+1.0）
-- **新近性**：30天内（+3）、30-90天（+2）、90-180天（+1）、180天以上（0）
-- **热门度**：高影响力引用 > 100（+3）、50-100（+2）、< 50（+1）
-- **质量**：多维度指标（强创新词 > 弱创新词 > 方法指标 > 量化结果 > 实验指标）
-
-## 常用 arXiv 分类
-
-| 分类代码 | 名称 | 说明 |
-|----------|------|------|
-| cs.AI | Artificial Intelligence | 人工智能 |
-| cs.LG | Learning | 机器学习 |
-| cs.CL | Computation and Language | 计算语言学/NLP |
-| cs.CV | Computer Vision | 计算机视觉 |
-| cs.MM | Multimedia | 多媒体 |
-| cs.MA | Multiagent Systems | 多智能体系统 |
-| cs.RO | Robotics | 机器人学 |
-
-## 常见问题
-
-### Q: 搜索没有结果？
-A: 检查以下几点：
-1. 确认网络连接正常
-2. 检查配置文件中的关键词是否正确
-3. 尝试扩大搜索的 arXiv 分类范围
-
-### Q: 图片提取失败？
-A:
-1. 确保安装了 PyMuPDF：`pip install PyMuPDF`
-2. 检查 arXiv ID 格式是否正确（如 2602.12345）
-
-### Q: 关键词自动链接不准确？
-A: 可以在 `start-my-day/scripts/link_keywords.py` 中修改 `COMMON_WORDS` 集合，添加你不需要自动链接的词
-
-### Q: "Papers directory not found" 错误？
-A:
-1. 检查 `OBSIDIAN_VAULT_PATH` 环境变量是否正确设置
-2. 确认 Obsidian Vault 中的目录结构是否正确创建（20_Research/Papers/）
-
-### Q: "未指定 vault 路径" 错误？
-A: 设置 `OBSIDIAN_VAULT_PATH` 环境变量，或在调用脚本时通过 `--vault` / `--config` 参数指定路径。
-
-## 高级配置
-
-### 修改搜索的 arXiv 分类
-
-在调用 `search_arxiv.py` 时通过 `--categories` 参数指定：
-
-```bash
-python scripts/search_arxiv.py --categories "cs.AI,cs.LG,cs.CL,cs.CV"
-```
-
-### 修改每天推荐的论文数量
-
-在调用 `search_arxiv.py` 时通过 `--top-n` 参数指定：
-
-```bash
-python scripts/search_arxiv.py --top-n 15
-```
-
-### 修改评分权重
-
-在 `start-my-day/scripts/search_arxiv.py` 的 `calculate_recommendation_score` 函数中调整权重。
 
 ## 工作原理
 
 ```
-用户输入 "start my day"
-         ↓
-    1. 加载研究配置
-    2. 扫描现有笔记构建索引
-         ↓
-    3. 搜索 arXiv（最近30天）
-    4. 搜索 Semantic Scholar（过去一年高热度）
-         ↓
-    5. 合并结果并去重
-    6. 综合评分并排序
-    7. 取前 N 篇
-         ↓
-    8. 生成今日推荐笔记
-    9. 前三篇生成详细分析
-    10. 自动链接关键词
+用户输入 /start-my-day
+         │
+         ▼
+  ┌─────────────────────┐
+  │ 1. 收集昨天的反馈    │ ← 增量：只读昨天的笔记
+  │    合并到偏好文件    │   不扫描全量历史
+  └─────────┬───────────┘
+            ▼
+  ┌─────────────────────┐
+  │ 2. 搜索论文          │ ← arXiv（近30天）
+  │    + 偏好加权评分    │   + S2（近1年高热度）
+  └─────────┬───────────┘
+            ▼
+  ┌─────────────────────┐
+  │ 3. 生成推荐笔记      │ ← 10篇，含细粒度反馈复选框
+  │    前3篇深度分析     │   图片 + 详细报告
+  └─────────┬───────────┘
+            ▼
+  ┌─────────────────────┐
+  │ 4. 用户在 Obsidian   │ ← 勾选感兴趣的主题
+  │    中给出反馈        │   明天自动生效
+  └─────────────────────┘
 ```
 
-## 贡献
+## 常见问题
 
-欢迎提交 Issue 和 Pull Request！
+### 搜索没有结果？
+1. 检查网络连接
+2. 检查 `research_interests.yaml` 中的关键词和分类
+3. Semantic Scholar API 偶尔会 429 限流，脚本会自动重试
 
-如果你觉得这个项目对你有帮助，请给个 Star ⭐️ 支持一下！
+### 图片提取失败？
+1. 确保安装了 PyMuPDF：`pip install PyMuPDF`
+2. 检查 arXiv ID 格式（如 `2602.12345`）
 
-[![Star History Chart](https://api.star-history.com/svg?repos=juliye2025/evil-read-arxiv&type=Date)](https://star-history.com/#juliye2025/evil-read-arxiv&Date)
+### 反馈没有生效？
+1. 反馈在下次运行 `/start-my-day` 时才会收集，不是实时的
+2. 检查 `user_preferences_state.yaml` 中的 `processed_dates` 确认日期是否已处理
+3. 如需重新处理某天：从 `processed_dates` 列表中删除该日期后重新运行
+
+### "Papers directory not found" 错误？
+检查 `OBSIDIAN_VAULT_PATH` 环境变量和 Vault 中的目录结构。
 
 ## 许可证
 
@@ -370,5 +347,5 @@ MIT License
 
 - [arXiv](https://arxiv.org/) - 开放获取的学术论文预印本平台
 - [Semantic Scholar](https://www.semanticscholar.org/) - AI 驱动的学术研究平台
-- [Claude Code](https://claude.ai/claude-code) - AI 辅助的代码和写作工具
-- [Obsidian](https://obsidian.md/) - 强大的知识管理工具
+- [Claude Code](https://claude.ai/claude-code) - AI 辅助编程工具
+- [Obsidian](https://obsidian.md/) - 知识管理工具

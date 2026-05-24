@@ -183,6 +183,8 @@ cat conf_papers_filtered.json
 
 **技术感悟**：[1-2句话：这篇工作的启发点或可借鉴之处]
 
+**反馈**：`like` / `dislike` / --  *（在行内编辑记录偏好）*
+
 ---
 ```
 
@@ -216,6 +218,8 @@ cat conf_papers_filtered.json
 **Benchmarks**: [list notable benchmarks used, e.g. [[MMLU]] / [[HumanEval]] / [[GSM8K]], with results]
 
 **Technical Insights**: [1-2 sentences: key takeaway or ideas to borrow]
+
+**Feedback**: `like` / `dislike` / --  *(edit inline to record preference)*
 
 ---
 ```
